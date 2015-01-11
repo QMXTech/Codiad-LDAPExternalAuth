@@ -1,5 +1,6 @@
 # Codiad-LDAPExternalAuth
 LDAP External Authentication Drop-In for Codiad
+
 Written by Korynkai of QuantuMatriX Technologies.
 
 WHEN INSTALLED, PLEASE ENSURE ldap.php IS ONLY READABLE BY THE WEBSERVER!
