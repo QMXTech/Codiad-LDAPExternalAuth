@@ -4,19 +4,6 @@
 //									   //
 // Written by Korynkai of QuantuMatriX Technologies.			   //
 //									   //
-//WHEN INSTALLED, PLEASE ENSURE ldap.php IS ONLY READABLE BY THE WEBSERVER!//
-//									   //
-// FOR EXOTIC INSTALLATIONS, IT MAY BE ADVISED TO MOVE THE SERVER	   //
-// INFORMATION TO A LOCATION OUTSIDE THE WEBSERVER ROOT, AND USE	   //
-// 'require_once' IN ldap.php (See PHP docs for details). DON'T FORGET TO  //
-// ENCLOSE THE SERVER INFORMATION WITHIN THE NEW FILE IN PHP TAGS AND 	   //
-// ENSURE ONLY THE WEBSERVER CAN READ THE NEW FILE!			   //
-//									   //
-// FAILING TO DO SO CAN RESULT IN SEVERE CONSEQUENCES IF YOUR LDAP SERVER  //
-// IS EXPOSED IN ANY WAY AND CAN GIVE YOUR PUPPY A HORRIBLE VIOLENT DEATH! //
-//									   //
-// YOU HAVE BEEN WARNED!						   //
-//									   //
 // Author's notes:							   //
 // As this is more of a configuration / authentication drop-in, I see no   //
 // reason to create a separate license file. This is really just for	   //
@@ -54,12 +41,6 @@
 // The LDAP connection URI of the server.
     $server = 'ldap://ldap.example.com:389';
 
-// The optional DN to bind to, if any.
-//    $binddn = 'cn=codiad,ou=services,dc=example,dc=com';
-
-// The optional password of the bind context, if any.
-//    $bindpw = 'secret';
-
 // The DN to search under on the server.
     $basedn = 'ou=people,dc=example,dc=com';
 
@@ -68,9 +49,6 @@
 //   http://www.ldapexplorer.com/en/manual/109010000-ldap-filter-syntax.htm
 // Default is: '(&(objectClass=*)(|(cn=$1)(email=$1)))'.
     $filter = '(&(objectClass=*)(|(cn=$1)(email=$1)))';
-
-// The user password attribute. Default is: 'userPassword'.
-    $pwattr = 'userPassword';
 
 /////////////////////////////////////////////////////////////////////////////
 // Do not edit anything under this line unless you know what you're doing! //
@@ -89,76 +67,61 @@
 	    ldap_set_option( $socket, LDAP_OPT_PROTOCOL_VERSION, $version );
 	    ldap_set_option( $socket, LDAP_OPT_REFERRALS, 0 );
 
-   	    if ( $socket ) {
+   	    if ( $socket == true ) {
 
-		if ( isset( $binddn ) && isset( $bindpw ) ) {
+                $result = ldap_search( $socket, $basedn, $tfilter );
+                $count  = ldap_count_entries( $socket, $result );
 
-		    $bind = ldap_bind( $socket, $binddn, $bindpw );
+                if ( $count === 1 ) {
+                    $data = ldap_get_entries( $socket, $result );
+                    $auth = ldap_bind( $socket, $data[0]["dn"], $password );
 
-		} elseif ( isset( $binddn ) ) {
+                    if ( $auth === -1 ) {
 
-		    $bind = ldap_bind( $socket, $binddn );
+                        die( formatJSEND( "error", "An LDAP error has occurred: " . ldap_error($socket)));
 
-		} else {
+                    } else if ( $auth == false ) {
 
-		    $bind = ldap_bind( $socket );
+                        die( formatJSEND( "error", "Password does not match." . $pwattr ) );
 
-		}
+                    } else if ( $auth == true ) {
 
-	    	if ( $bind ) {
+                        $_SESSION["user"] = $username;
 
-	            $result = ldap_search( $socket, $basedn, $tfilter );
-                    $count  = ldap_count_entries( $socket, $result );
+                        if (isset($_POST["language"])) {
 
-                    if ( $count == 1 ) {
+                            $_SESSION["lang"] = $_POST["language"];
 
-                    	$data = ldap_get_entries( $socket, $result );             
-                    	$auth = ldap_compare( $socket, $data[0]['dn'], $pwattr, $password);
+                        } else {
 
-                    	if ( ! $auth ) {
+                            $_SESSION["lang"] = "en";
 
-                            die( formatJSEND( "error", "Password does not match." . $pwattr ) );
+                        }
 
-                    	} else {
+                        $_SESSION["theme"] = $_POST["theme"];
 
-		            $_SESSION['user'] = $username;
+                        if (isset($_POST["project"])) {
 
-			    if (isset($_POST['language'])) {
+                            $_SESSION["project"] = $_POST["project"];
 
-		                $_SESSION['lang'] = $_POST['language'];
+                        }
 
-			    } else {
+                        echo formatJSEND("success", array("username"=>$_SESSION["user"]));
 
-			        $_SESSION['lang'] = 'en';
+                        header("Location: ".$_SERVER["PHP_SELF"]."?action=verify");
 
-			    }
+                        }
 
-		            $_SESSION['theme'] = $_POST['theme'];
-		            $_SESSION['project'] = $_POST['project'];
+                } elseif ( $count > 1 ) {
 
-			    echo formatJSEND("success", array("username"=>$_SESSION['user']));
+                    die( formatJSEND( "error", "A server error occurred: LDAP filter is non-unique. Please ensure this is a unique identifier within its context.
+                                                        If the problem persists, please contact the webmaster. If you are the webmaster, please check the LDAP filter used." ) );
 
-			    header('Location: '.$_SERVER['PHP_SELF'].'?action=verify');
+                } else {
 
-		        }
+                    die( formatJSEND( "error", "LDAP user $username does not exist." ) );
 
-		    } elseif ( $count > 1 ) {
-
-		        die( formatJSEND( "error", "A server error occurred: LDAP filter is non-unique. Please ensure this is a unique identifier within its context.\n
-						        If the problem persists, please contact the webmaster. If you are the webmaster, please check the LDAP filter used." ) );
-
-		    } else {
-
-		        die( formatJSEND( "error", "LDAP user $username does not exist." ) );
-
-		    }
-
-	        } else {
-
-		    die( formatJSEND( "error", "An error occurred: Cannot bind to LDAP server. Please contact the webmaster.\n
-			 			    If you are the webmaster, please ensure the bind DN is accurate and the DN exists and is bindable from this webserver." ) );
-
-	    	}
+                }
 
 	    } else {
 
