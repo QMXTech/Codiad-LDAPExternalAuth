@@ -3,19 +3,6 @@ LDAP External Authentication Drop-In for Codiad
 
 Written by Korynkai of QuantuMatriX Technologies.
 
-WHEN INSTALLED, PLEASE ENSURE ldap.php IS ONLY READABLE BY THE WEBSERVER!
-
-FOR EXOTIC INSTALLATIONS, IT MAY BE ADVISED TO MOVE THE SERVER
-INFORMATION TO A LOCATION OUTSIDE THE WEBSERVER ROOT, AND USE
-'require_once' IN ldap.php (See PHP docs for details). DON'T FORGET TO 
-ENCLOSE THE SERVER INFORMATION WITHIN THE NEW FILE IN PHP TAGS AND 
-ENSURE ONLY THE WEBSERVER CAN READ THE NEW FILE!
-
-FAILING TO DO SO CAN RESULT IN SEVERE CONSEQUENCES IF YOUR LDAP SERVER 
-IS EXPOSED IN ANY WAY AND CAN GIVE YOUR PUPPY A HORRIBLE VIOLENT DEATH! 
-
-YOU HAVE BEEN WARNED!
-
 Author's notes:
 As this is more of a configuration / authentication drop-in, I see no
 reason to create a separate license file. This is really just for
