@@ -1,7 +1,7 @@
 # Codiad-LDAPExternalAuth
 LDAP External Authentication Drop-In for Codiad
 
-Written by Korynkai of QuantuMatriX Technologies.
+Written by Korynkai (Matt Schultz) of QuantuMatriX Technologies.
 
 ## Installation
 
