@@ -7,7 +7,7 @@ Written by Korynkai (Matt Schultz) of QuantuMatriX Technologies.
 
 * Download `ldap.php` here: [ldap.php](https://raw.github.com/QMXTech/Codiad-LDAPExternalAuth/master/ldap.php) (right-click -> Save Link As).
 
-* Edit `ldap.php` in a text editor, changing configuration values as needed. Do not edit the core logic (anything under the "Do not edit anything under..." line) -- you can break functionality, corrupt your users.php file, or even accidentally allow anybody to log in and modify your code. Only edit under the line if you're looking to experiment and have a test environment set up.
+* Edit `ldap.php` in a text editor, changing configuration values as needed (see below in "Configuration" for a description of these values). Do not edit the core logic (anything under the "Do not edit anything under..." line) -- you can break functionality, corrupt your users.php file, or even accidentally allow anybody to log in and modify your code. Only edit under the line if you're looking to experiment and have a test environment set up.
 
 * Save `ldap.php` somewhere on the webserver, preferably somewhere within the Codiad root (I created a special directory for External Authentication called `auth` on my setup) and ensure your webserver daemon has permissions to read the file.
 
