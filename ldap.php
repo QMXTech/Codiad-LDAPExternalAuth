@@ -3,7 +3,7 @@
 /*
  * Codiad LDAP External Authentication Bridge
  *
- * Written by Korynkai (Matt Schultz) of QuantuMatriX Technologies.
+ * Copyright (C) 2015 Matt Schultz (Korynkai) & QuantuMatriX Technologies (qmxtech.com)
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
