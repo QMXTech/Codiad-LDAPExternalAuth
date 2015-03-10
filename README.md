@@ -48,7 +48,7 @@ Most of the configuration should be completed during the installation; However i
  * `$filter = '(&(objectClass=*)(|(cn=$1)(email=$1)))';` <-- Allows CN or email to denote the username. As it uses a logical `or` (`|`), it allows more than one field to directly act as the username, in effect allowing each LDAP user (with both a CN and an email attribute) to create/log-in to two Codiad users if they so desire.
  * `$filter = '(&(objectClass=*)(cn=$1))';` <-- Strictly use CN as username.
  * `$filter = '(&(objectClass=*)(email=$1))';` <-- Strictly use email as username.
- * `$filter = '(&(objectClass=*)(uniqueIdentifier=$1))';` <-- Strictly use uniqueIdentifier as username (This is useful for custom self-identifiable usernames; This is the filter we use on our setup, however it requires additional configuration on LDAP.
+ * `$filter = '(&(objectClass=*)(uniqueIdentifier=$1))';` <-- Strictly use uniqueIdentifier as username. This is useful for custom self-identifiable usernames and is the filter we use on our setup, however it may require additional configuration on LDAP.
 
 * `$createuser` either allows or denies the automatic creation of a Codiad user upon successful LDAP authentication. If set to true, a `user` will be created if the user successfully authenticates through LDAP but is not present within Codiad's `data/users.php` file. If set to `false`, the user will be denied access if they are not present within Codiad's `data/users.php` file, regardless of whether or not the user has successfully authenticated to LDAP. Default is `true`.
 
