@@ -1,8 +1,4 @@
-Copyright (C) 2015 Matt Schultz (Korynkai) of QuantuMatriX Technologies (qmxtech.com)
-
-Permission granted to Codiad & Kent Safranski (codiad.com) to change copyright
-notice if the prospect of merging this project into Codiad is proposed. However,
-the original author requests to be credited in the final product in such case.
+Copyright (C) 2015 Matt Schultz (Korynkai) & QuantuMatriX Technologies (qmxtech.com)
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

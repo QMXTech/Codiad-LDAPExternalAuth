@@ -1,35 +1,32 @@
 <?php
-/////////////////////////////////////////////////////////////////////////////
-// Codiad LDAP External Authentication					   //
-//									   //
-// Written by Korynkai of QuantuMatriX Technologies.			   //
-//									   //
-// Author's notes:							   //
-// As this is more of a configuration / authentication drop-in, I see no   //
-// reason to create a separate license file.				   //
-//									   //
-// Permission is hereby granted, free of charge, to any person obtaining   //
-// a copy of this software and associated documentation files (the	   //
-// "Software"), to deal in the Software without restriction, including	   //
-// without limitation the rights to use, copy, modify, merge, publish,	   //
-// distribute, sublicense, and/or sell copies of the Software, and to	   //
-// permit persons to whom the Software is furnished to do so, subject to   //
-// the following conditions:						   //
-//									   //
-// The above copyright notice and this permission notice shall be	   //
-// included in all copies or substantial portions of the Software.	   //
-//									   //
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,	   //
-// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF	   //
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND		   //
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE  //
-// LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION  //
-// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION   //
-// WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.	   //
-/////////////////////////////////////////////////////////////////////////////
+
+/*
+ * Codiad LDAP External Authentication Bridge
+ *
+ * Written by Korynkai (Matt Schultz) of QuantuMatriX Technologies.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 
 ///////////////////
-// Configuration //
+// CONFIGURATION //
 ///////////////////
 
 // The LDAP connection URI of the server.
@@ -42,7 +39,7 @@
 // IETF RFC definition (quite technical) is here: 
 //	http://tools.ietf.org/search/rfc4515
 // and you can find another good (easier to follow) reference here
-// (shortened centos link):
+// (shortened CentOS documentation link):
 //	http://goo.gl/FOdGp7
 // The default will allow a CN or an email to log in (however, the user 
 // environments between the CN and email logins would differ).
@@ -66,101 +63,128 @@
     $version = 3;
 
 /////////////////////////////////////////////////////////////////////////////
-// Do not edit anything under this line unless you know what you're doing! //
+// DO NOT EDIT ANYTHING UNDER THIS LINE UNLESS YOU KNOW WHAT YOU'RE DOING! //
 /////////////////////////////////////////////////////////////////////////////
 
+    // Ensure we have class.user.php so we may use this class.
     require_once( COMPONENTS . "/user/class.user.php" );
 
+    // Check if our session is not logged in.
     if ( !isset( $_SESSION['user'] ) ) {
 
-        if ( isset( $_POST['username'] ) && isset( $_POST['password'] ) ) {
+	// Check if a username and password were posted.
+	if ( isset( $_POST['username'] ) && isset( $_POST['password'] ) ) {
 
-            $User = new User();
+	    // Create user object.
+	    $User = new User();
 
-            $User->username = $_POST['username'];
-            $User->password = $_POST['password'];
+	    // Initialize values of user object.
+	    $User->username = $_POST['username'];
+	    $User->password = $_POST['password'];
 
-            $tfilter = str_replace( "$1", $User->username, $filter );
-            $socket = ldap_connect( $server );
+	    // Replace user name token in search filter.
+	    $tfilter = str_replace( "$1", $User->username, $filter );
 
-            ldap_set_option( $socket, LDAP_OPT_PROTOCOL_VERSION, $version );
-            ldap_set_option( $socket, LDAP_OPT_REFERRALS, 0 );
+	    // Create LDAP connection socket.
+	    $socket = ldap_connect( $server );
 
-            if ( $socket == true ) {
+	    // Set initial LDAP values.
+	    ldap_set_option( $socket, LDAP_OPT_PROTOCOL_VERSION, $version );
+	    ldap_set_option( $socket, LDAP_OPT_REFERRALS, 0 );
 
-                $result = ldap_search( $socket, $basedn, $tfilter );
-                $count  = ldap_count_entries( $socket, $result );
+	    // Check if LDAP socket creation was a success
+	    if ( $socket == true ) {
 
+		// Search through basedn based on the filter, and count entries.
+		$result = ldap_search( $socket, $basedn, $tfilter );
+		$count  = ldap_count_entries( $socket, $result );
+
+		// Ensure count is definitely equal to 1
                 if ( $count === 1 ) {
 
-                    $data = ldap_get_entries( $socket, $result );
-                    $auth = ldap_bind( $socket, $data[0]['dn'], $User->password );
+		    // Get the entry from the search result, and bind using its DN.
+		    $data = ldap_get_entries( $socket, $result );
+		    $auth = ldap_bind( $socket, $data[0]['dn'], $User->password );
 
-                    if ( $auth === -1 ) {
+		    // Check the return value of the bind action.
+		    if ( $auth === -1 ) {
 
+			// Deny login and send message, An LDAP error occurred.
                         die( formatJSEND( "error", "An LDAP error has occurred: " . ldap_error($socket) ) );
 
                     } elseif ( $auth == false ) {
 
-                        die( formatJSEND( "error", "Password does not match." ) );
+			// Invalid login.
+			die( formatJSEND( "error", "Invalid user name or password." ) );
 
-                    } elseif ( $auth == true ) {
+		    } elseif ( $auth == true ) {
 
-                        if ( $User->CheckDuplicate() ) {
+			// Check if user already exists within users.php.
+			if ( $User->CheckDuplicate() ) {
 
-                            if ( $createuser == true ) {
+			    // Check if we can create a user within users.php.
+			    if ( $createuser == true ) {
 
-                                $User->users[] = array( 'username' => $User->username, 'password' => null, 'project' => "" );
-                                saveJSON( "users.php", $User->users );
-                                $_SESSION['user'] = $User->username;
+				// Save array back to JSON and set the session username.
+				$User->users[] = array( 'username' => $User->username, 'password' => null, 'project' => "" );
+				saveJSON( "users.php", $User->users );
+				$_SESSION['user'] = $User->username;
 
-                            } else {
+			    } else {
 
-                                die( formatJSEND( "error", "User " . $User->username . " does not exist within Codiad." ) );
+				// Deny login and send message, the user doesn't exist within users.php.
+				die( formatJSEND( "error", "User " . $User->username . " does not exist within Codiad." ) );
 
-                            }
+			    }
 
-                        } else {
+			} else {
 
-                            $_SESSION['user'] = $User->username;
+			    // Set the session username.
+			    $_SESSION['user'] = $User->username;
 
-                        }
+			}
 
-                        if ( isset( $_POST['language'] ) ) {
+			// Set the session language, if given, or set it to english as default.
+			if ( isset( $_POST['language'] ) ) {
 
-                            $_SESSION['lang'] = $_POST['language'];
+			    $_SESSION['lang'] = $_POST['language'];
 
-                        } else {
+			} else {
 
-                            $_SESSION['lang'] = "en";
+			    $_SESSION['lang'] = "en";
 
-                        }
+			}
 
-                        $_SESSION['theme'] = $_POST['theme'];
-                        $_SESSION['project'] = $_POST['project'];
+			// Set the session theme and project.
+			$_SESSION['theme'] = $_POST['theme'];
+			$_SESSION['project'] = $_POST['project'];
 
-                        echo formatJSEND( "success", array( 'username' => $User->username ) );
-                        header( "Location: " . $_SERVER['PHP_SELF'] . "?action=verify" );
+			// Respond by sending verification tokens on success.
+			echo formatJSEND( "success", array( 'username' => $User->username ) );
+			header( "Location: " . $_SERVER['PHP_SELF'] . "?action=verify" );
 
-                    }
+		    }
 
-                } elseif ( $count > 1 ) {
+		} elseif ( $count > 1 ) {
 
-                    die( formatJSEND( "error", "A server error occurred: LDAP filter is non-unique. Please ensure this is a unique identifier within its context.
-                                                        If the problem persists, please contact the webmaster. If you are the webmaster, please check the LDAP filter used." ) );
+		    // We returned too many results. Error as such.
+		    die( formatJSEND( "error", "A server error occurred: LDAP filter result is non-unique. Please ensure this is a unique identifier within its context.
+					    If the problem persists, please contact the webmaster. If you are the webmaster, please check the LDAP filter used." ) );
 
-                } else {
+		} else {
 
-                    die( formatJSEND( "error", "LDAP user " . $User->username . " does not exist." ) );
+		    // Invalid login.
+		    die( formatJSEND( "error", "Incorrect user name or password." ) );
 
-                }
+		}
 
-            } else {
+	    } else {
 
+		// The server is having issues connecting to the LDAP server. Error as such.
                 die( formatJSEND( "error", "An error occurred: Cannot connect to LDAP server. Please contact the webmaster. 
                                         If you are the webmaster, please contact your LDAP server administrator or check if your LDAP server is running." ) );
 
-            }
+	    }
 	}
     }
 
