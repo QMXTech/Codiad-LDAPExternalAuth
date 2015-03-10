@@ -33,10 +33,10 @@
 ///////////////////
 
 // The LDAP connection URI of the server.
-    $server = 'ldap://ldap.example.com:389';
+    $server = "ldap://ldap.example.com:389";
 
 // The DN to search under on the server.
-    $basedn = 'ou=people,dc=example,dc=com';
+    $basedn = "ou=people,dc=example,dc=com";
 
 // The LDAP search filter. If you aren't sure what this is, the official
 // IETF RFC definition (quite technical) is here: 
@@ -50,7 +50,7 @@
 // A couple alternatives for simple set-ups: 
 //	CN only: '(&(objectClass=*)(cn=$1))'
 //	email only: '(&(objectClass=*)(email=$1))'
-    $filter = '(&(objectClass=*)(|(cn=$1)(email=$1)))';
+    $filter = "(&(objectClass=*)(|(cn=$1)(email=$1)))";
 
 // Optionally create Codiad user if it doesn't already exist. This can be set
 // to 'false' if the administrator would like to manually control access to 
@@ -71,14 +71,14 @@
 
     require_once( COMPONENTS . "/user/class.user.php" );
 
-    if ( !isset( $_SESSION["user"] ) ) {
+    if ( !isset( $_SESSION['user'] ) ) {
 
-        if ( isset( $_POST["username"] ) && isset( $_POST["password"] ) ) {
+        if ( isset( $_POST['username'] ) && isset( $_POST['password'] ) ) {
 
             $User = new User();
 
-            $User->username = $_POST["username"];
-            $User->password = $_POST["password"];
+            $User->username = $_POST['username'];
+            $User->password = $_POST['password'];
 
             $tfilter = str_replace( "$1", $User->username, $filter );
             $socket = ldap_connect( $server );
@@ -94,7 +94,7 @@
                 if ( $count === 1 ) {
 
                     $data = ldap_get_entries( $socket, $result );
-                    $auth = ldap_bind( $socket, $data[0]["dn"], $User->password );
+                    $auth = ldap_bind( $socket, $data[0]['dn'], $User->password );
 
                     if ( $auth === -1 ) {
 
@@ -110,9 +110,9 @@
 
                             if ( $createuser == true ) {
 
-                                $User->users[] = array( "username" => $User->username, "password" => null, "project" => "" );
-                                saveJSON( 'users.php', $User->users );
-                                $_SESSION["user"] = $User->username;
+                                $User->users[] = array( 'username' => $User->username, 'password' => null, 'project' => "" );
+                                saveJSON( "users.php", $User->users );
+                                $_SESSION['user'] = $User->username;
 
                             } else {
 
@@ -122,25 +122,25 @@
 
                         } else {
 
-                            $_SESSION["user"] = $User->username;
+                            $_SESSION['user'] = $User->username;
 
                         }
 
-                        if ( isset( $_POST["language"] ) ) {
+                        if ( isset( $_POST['language'] ) ) {
 
-                            $_SESSION["lang"] = $_POST["language"];
+                            $_SESSION['lang'] = $_POST['language'];
 
                         } else {
 
-                            $_SESSION["lang"] = "en";
+                            $_SESSION['lang'] = "en";
 
                         }
 
-                        $_SESSION["theme"] = $_POST["theme"];
-                        $_SESSION["project"] = $_POST["project"];
+                        $_SESSION['theme'] = $_POST['theme'];
+                        $_SESSION['project'] = $_POST['project'];
 
-                        echo formatJSEND( "success", array( "username" => $User->username ) );
-                        header( "Location: " . $_SERVER["PHP_SELF"] . "?action=verify" );
+                        echo formatJSEND( "success", array( 'username' => $User->username ) );
+                        header( "Location: " . $_SERVER['PHP_SELF'] . "?action=verify" );
 
                     }
 
