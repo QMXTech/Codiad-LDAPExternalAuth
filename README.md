@@ -9,7 +9,6 @@ Written by Korynkai (Matt Schultz) of QuantuMatriX Technologies.
 * Edit `ldap.php` in a text editor, changing configuration values as needed. Do not edit the core logic (anything under the "Do not edit anything under..." line) -- you can break functionality, corrupt your users.php file, or even accidentally allow anybody to log in and modify your code. Only edit under the line if you're looking to experiment and have a test environment set up.
 * Save `ldap.php` somewhere on the webserver, preferably somewhere within the Codiad root (I created a special directory for External Authentication called `auth` on my setup) and ensure your webserver daemon has permissions to read the file.
 * Edit Codiad's `config.php` in a text editor, uncommenting and/or adding the line `define("AUTH_PATH", "/path/to/ldap.php");`. Replace "/path/to" with the actual path. You may use the `BASE_PATH` directive if you saved `ldap.php` to somewhere within the Codiad root. For example, on my setup (with the `auth` directory), this is set to `define("AUTH_PATH", BASE_PATH . "/auth/ldap.php");`
-* (Optionally) back up your Codiad `data/users.php` file to somewhere safe (in case of an LDAP issue), then edit `data/users.php` so every field marked `"password"` looks like `"password":null`. This is probably unnecessary, but ensures that no Codiad internal passwords are used and authentication occurs strictly over LDAP.
 
 ## Configuration
 
