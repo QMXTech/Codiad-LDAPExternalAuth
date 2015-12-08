@@ -34,6 +34,10 @@
 
 // The DN to search under on the server.
     $basedn = "ou=people,dc=example,dc=com";
+    
+// Codiad System User for Bind
+    $binduserrdn = 'CN=codiadsys,CN=Users,DC=example,DC=com';
+    $bindpass = "";
 
 // The LDAP search filter. If you aren't sure what this is, the official
 // IETF RFC definition (quite technical) is here: 
@@ -91,9 +95,12 @@
 	    // Set initial LDAP values.
 	    ldap_set_option( $socket, LDAP_OPT_PROTOCOL_VERSION, $version );
 	    ldap_set_option( $socket, LDAP_OPT_REFERRALS, 0 );
+	    
+	    // System user bind to allow search
+            $preauth = ldap_bind( $socket, $binduserrdn, $bindpass);
 
 	    // Check if LDAP socket creation was a success
-	    if ( $socket == true ) {
+	    if ( $preauth == true ) {
 
 		// Search through basedn based on the filter, and count entries.
 		$result = ldap_search( $socket, $basedn, $tfilter );
