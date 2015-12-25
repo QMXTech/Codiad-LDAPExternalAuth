@@ -36,11 +36,14 @@
     $basedn = "ou=people,dc=example,dc=com";
     
 // Use anonymous bind
-//  Does not work on Active Directory, however this is the default
-//  method for OpenLDAP.
+//  This does not work by default on Active Directory, however this is the 
+//  default method for most servers based on the LDAP standard.
+//    Optionally one can bind to a user for search on any LDAP server or
+//    enable anonymous binds for search on Active Directory, however this
+//    allows for any search option.
     $anonbind = true;
     
-// LDAP User for Bind (if anonymous bind is set to "false")
+// LDAP User for bind (if anonymous bind is set to "false")
     $binddn = "cn=binduser,cn=Users,dc=example,dc=com";
     $bindpass = "";
 
@@ -101,14 +104,14 @@
 	    ldap_set_option( $socket, LDAP_OPT_PROTOCOL_VERSION, $version );
 	    ldap_set_option( $socket, LDAP_OPT_REFERRALS, 0 );
 	    
-	    // System user bind to allow search
+	    // Pre-authenticate based on whether or not we are using anonymous bind
 	    if ( $anonbind == true ) {
-	    	$preauth = true;
+	    	$preauth = $socket;
 	    } else {
-                $preauth = ldap_bind( $socket, $binddn, $bindpass);
+                $preauth = ldap_bind( $socket, $binddn, $bindpass );
 	    }
 
-	    // Check if LDAP socket creation was a success
+	    // Check if LDAP socket creation was a success.
 	    if ( $preauth == true ) {
 
 		// Search through basedn based on the filter, and count entries.
