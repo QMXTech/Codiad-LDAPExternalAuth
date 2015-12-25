@@ -104,14 +104,20 @@
 	    ldap_set_option( $socket, LDAP_OPT_PROTOCOL_VERSION, $version );
 	    ldap_set_option( $socket, LDAP_OPT_REFERRALS, 0 );
 	    
-	    // Pre-authenticate based on whether or not we are using anonymous bind
+	    // Check if we are using anonymous bind.
 	    if ( $anonbind == true ) {
+	    	
+	    	// Set preauth flag to value of socket on anonymous bind.
 		$preauth = $socket;
+		
 	    } else {
+	    	
+	    	// Set preauth flag using call to ldap_bind on authenticated bind.
 		$preauth = ldap_bind( $socket, $binddn, $bindpass );
+		
 	    }
 
-	    // Check if LDAP socket creation was a success.
+	    // Check if LDAP pre-authentication (or socket creation) was a success.
 	    if ( $preauth == true ) {
 
 		// Search through basedn based on the filter, and count entries.
