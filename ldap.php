@@ -106,9 +106,9 @@
 	    
 	    // Pre-authenticate based on whether or not we are using anonymous bind
 	    if ( $anonbind == true ) {
-	    	$preauth = $socket;
+		$preauth = $socket;
 	    } else {
-                $preauth = ldap_bind( $socket, $binddn, $bindpass );
+		$preauth = ldap_bind( $socket, $binddn, $bindpass );
 	    }
 
 	    // Check if LDAP socket creation was a success.
