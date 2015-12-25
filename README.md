@@ -23,6 +23,14 @@ Most of the configuration should be completed during the installation; However i
 * `$basedn` would be your LDAP server's search base distinguished name. This would be where Codiad looks for user entries within LDAP. Example:
  * `$basedn = 'ou=people,dc=example,dc=com';`
 
+* Set `$anonbind` based on whether or not your LDAP server uses anonymous binds for search. Active Directory does not allow this by default, however this is the default method for most servers based on the LDAP standard. Optionally one can bind to a user for search on any LDAP server or enable anonymous binds for search on Active Directory, however this allows for any search option. Examples:
+ * `$anonbind = true;`
+ * `$anonbind = false;`
+
+* `$binddn` and `$bindpass` are the corresponding DN and password to bind to for search if `$anonbind` is disabled. Examples:
+ * `$binddn = "cn=binduser,cn=Users,dc=example,dc=com";`
+ * `$bindpass = "secret";`
+
 * `$filter` is your LDAP user search filter. This tells Codiad which attribute/value pairs to look for as the username to look up. If you aren't sure what to do here, you may use one of the alternatives or use the references either at http://tools.ietf.org/search/rfc4515 (quite technical IETF RFC) or http://goo.gl/FOdGp7 (CentOS documentation page on LDAP search filters). The variable `$1` must always be supplied as a value as it signifies the username. The default will allow a CN or an email to log in; however, the user environments between the CN and email logins would differ, essentially acting as separate users within Codiad. Examples:
  * `$filter = '(&(objectClass=*)(|(cn=$1)(email=$1)))';` <-- Allows CN or email to denote the username. As it uses a logical `or` (`|`), it allows more than one field to directly act as the username, in effect allowing each LDAP user (with both a CN and an email attribute) to create/log-in to two Codiad users if they so desire.
 
