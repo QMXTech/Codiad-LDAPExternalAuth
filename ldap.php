@@ -35,8 +35,13 @@
 // The DN to search under on the server.
     $basedn = "ou=people,dc=example,dc=com";
     
-// Codiad System User for Bind
-    $binduserrdn = 'CN=codiadsys,CN=Users,DC=example,DC=com';
+// Use anonymous bind
+//  Does not work on Active Directory, however this is the default
+//  method for OpenLDAP.
+    $anonbind = true;
+    
+// LDAP User for Bind (if anonymous bind is set to "false")
+    $binddn = "cn=binduser,cn=Users,dc=example,dc=com";
     $bindpass = "";
 
 // The LDAP search filter. If you aren't sure what this is, the official
@@ -97,7 +102,11 @@
 	    ldap_set_option( $socket, LDAP_OPT_REFERRALS, 0 );
 	    
 	    // System user bind to allow search
-            $preauth = ldap_bind( $socket, $binduserrdn, $bindpass);
+	    if ( $anonbind == true ) {
+	    	$preauth = true;
+	    } else {
+                $preauth = ldap_bind( $socket, $binddn, $bindpass);
+	    }
 
 	    // Check if LDAP socket creation was a success
 	    if ( $preauth == true ) {
