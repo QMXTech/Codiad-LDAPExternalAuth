@@ -43,7 +43,7 @@
 //    allows for any search option.
     $anonbind = true;
     
-// LDAP User for bind (if anonymous bind is set to "false")
+// LDAP User for bind (if anonymous bind is set to "false").
     $binddn = "cn=binduser,cn=Users,dc=example,dc=com";
     $bindpass = "";
 
