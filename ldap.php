@@ -30,10 +30,10 @@
 ///////////////////
 
 // The LDAP connection URI of the server.
-    $server = "ldap://ldap.example.com:389";
+	$server = "ldap://ldap.example.com:389";
 
 // The DN to search under on the server.
-    $basedn = "ou=people,dc=example,dc=com";
+	$basedn = "ou=people,dc=example,dc=com";
     
 // Use anonymous bind
 //  This does not work by default on Active Directory, however this is the 
@@ -41,11 +41,11 @@
 //    Optionally one can bind to a user for search on any LDAP server or
 //    enable anonymous binds for search on Active Directory, however this
 //    allows for any search option.
-    $anonbind = true;
+	$anonbind = true;
     
 // LDAP User for bind (if anonymous bind is set to "false").
-    $binddn = "cn=binduser,cn=Users,dc=example,dc=com";
-    $bindpass = "";
+	$binddn = "cn=binduser,cn=Users,dc=example,dc=com";
+	$bindpass = "";
 
 // The LDAP search filter. If you aren't sure what this is, the official
 // IETF RFC definition (quite technical) is here: 
@@ -59,30 +59,30 @@
 // A couple alternatives for simple set-ups: 
 //	CN only: '(&(objectClass=*)(cn=$1))'
 //	email only: '(&(objectClass=*)(email=$1))'
-    $filter = "(&(objectClass=*)(|(cn=$1)(email=$1)))";
+	$filter = "(&(objectClass=*)(|(cn=$1)(email=$1)))";
 
 // Optionally create Codiad user if it doesn't already exist. This can be set
 // to 'false' if the administrator would like to manually control access to 
 // Codiad from within Codiad itself, rather than let the search filter fully
 // dictate user access control. 
 // Default is 'true'.
-    $createuser = true;
+	$createuser = true;
 
 // The LDAP protocol version to use. Changing this is probably a very bad 
 // idea unless you're absolutely positive you are using some completely 
 // non-standard or obsolete (pre-2003) version of LDAP.
 // Default is '3'. Developer heavily discourages changing this.
-    $version = 3;
+	$version = 3;
 
 /////////////////////////////////////////////////////////////////////////////
 // DO NOT EDIT ANYTHING UNDER THIS LINE UNLESS YOU KNOW WHAT YOU'RE DOING! //
 /////////////////////////////////////////////////////////////////////////////
 
-    // Ensure we have class.user.php so we may use this class.
-    require_once( COMPONENTS . "/user/class.user.php" );
+	// Ensure we have class.user.php so we may use this class.
+	require_once( COMPONENTS . "/user/class.user.php" );
 
-    // Check if our session is not logged in.
-    if ( !isset( $_SESSION['user'] ) ) {
+	// Check if our session is not logged in.
+	if ( !isset( $_SESSION['user'] ) ) {
 
 		// Check if a username and password were posted.
 		if ( isset( $_POST['username'] ) && isset( $_POST['password'] ) ) {
@@ -106,7 +106,7 @@
 			
 			// Check if we are using anonymous bind.
 			if ( $anonbind == true ) {
-	    	
+			
 				// Set preauth flag to value of socket on anonymous bind.
 				$preauth = $socket;
 			
@@ -211,6 +211,6 @@
 
 			}
 		}
-    }
+	}
 
 ?>
