@@ -84,133 +84,133 @@
     // Check if our session is not logged in.
     if ( !isset( $_SESSION['user'] ) ) {
 
-	// Check if a username and password were posted.
-	if ( isset( $_POST['username'] ) && isset( $_POST['password'] ) ) {
+		// Check if a username and password were posted.
+		if ( isset( $_POST['username'] ) && isset( $_POST['password'] ) ) {
 
-	    // Create user object.
-	    $User = new User();
+			// Create user object.
+			$User = new User();
 
-	    // Initialize values of user object.
-	    $User->username = $_POST['username'];
-	    $User->password = $_POST['password'];
+			// Initialize values of user object.
+			$User->username = $_POST['username'];
+			$User->password = $_POST['password'];
 
-	    // Replace user name token in search filter.
-	    $tfilter = str_replace( "$1", $User->username, $filter );
+			// Replace user name token in search filter.
+			$tfilter = str_replace( "$1", $User->username, $filter );
 
-	    // Create LDAP connection socket.
-	    $socket = ldap_connect( $server );
+			// Create LDAP connection socket.
+			$socket = ldap_connect( $server );
 
-	    // Set initial LDAP values.
-	    ldap_set_option( $socket, LDAP_OPT_PROTOCOL_VERSION, $version );
-	    ldap_set_option( $socket, LDAP_OPT_REFERRALS, 0 );
-	    
-	    // Check if we are using anonymous bind.
-	    if ( $anonbind == true ) {
+			// Set initial LDAP values.
+			ldap_set_option( $socket, LDAP_OPT_PROTOCOL_VERSION, $version );
+			ldap_set_option( $socket, LDAP_OPT_REFERRALS, 0 );
+			
+			// Check if we are using anonymous bind.
+			if ( $anonbind == true ) {
 	    	
-	    	// Set preauth flag to value of socket on anonymous bind.
-		$preauth = $socket;
-		
-	    } else {
-	    	
-	    	// Set preauth flag using call to ldap_bind on authenticated bind.
-		$preauth = ldap_bind( $socket, $binddn, $bindpass );
-		
-	    }
+				// Set preauth flag to value of socket on anonymous bind.
+				$preauth = $socket;
+			
+			} else {
+				
+				// Set preauth flag using call to ldap_bind on authenticated bind.
+				$preauth = ldap_bind( $socket, $binddn, $bindpass );
+			
+			}
 
-	    // Check if LDAP pre-authentication (or socket creation) was a success.
-	    if ( $preauth == true ) {
+			// Check if LDAP pre-authentication (or socket creation) was a success.
+			if ( $preauth == true ) {
 
-		// Search through basedn based on the filter, and count entries.
-		$result = ldap_search( $socket, $basedn, $tfilter );
-		$count  = ldap_count_entries( $socket, $result );
+				// Search through basedn based on the filter, and count entries.
+				$result = ldap_search( $socket, $basedn, $tfilter );
+				$count  = ldap_count_entries( $socket, $result );
 
-		// Ensure count is definitely equal to 1
-                if ( $count === 1 ) {
+				// Ensure count is definitely equal to 1
+				if ( $count === 1 ) {
 
-		    // Get the entry from the search result, and bind using its DN.
-		    $data = ldap_get_entries( $socket, $result );
-		    $auth = ldap_bind( $socket, $data[0]['dn'], $User->password );
+					// Get the entry from the search result, and bind using its DN.
+					$data = ldap_get_entries( $socket, $result );
+					$auth = ldap_bind( $socket, $data[0]['dn'], $User->password );
 
-		    // Check the return value of the bind action.
-		    if ( $auth === -1 ) {
+					// Check the return value of the bind action.
+					if ( $auth === -1 ) {
 
-			// Deny login and send message, An LDAP error occurred.
-                        die( formatJSEND( "error", "An LDAP error has occurred: " . ldap_error($socket) ) );
+						// Deny login and send message, An LDAP error occurred.
+						die( formatJSEND( "error", "An LDAP error has occurred: " . ldap_error($socket) ) );
 
-                    } elseif ( $auth == false ) {
+					} elseif ( $auth == false ) {
 
-			// Invalid login.
-			die( formatJSEND( "error", "Invalid user name or password." ) );
+						// Invalid login.
+						die( formatJSEND( "error", "Invalid user name or password." ) );
 
-		    } elseif ( $auth == true ) {
+					} elseif ( $auth == true ) {
 
-			// Check if user already exists within users.php.
-			if ( $User->CheckDuplicate() ) {
+						// Check if user already exists within users.php.
+						if ( $User->CheckDuplicate() ) {
 
-			    // Check if we can create a user within users.php.
-			    if ( $createuser == true ) {
+							// Check if we can create a user within users.php.
+							if ( $createuser == true ) {
 
-				// Save array back to JSON and set the session username.
-				$User->users[] = array( 'username' => $User->username, 'password' => null, 'project' => "" );
-				saveJSON( "users.php", $User->users );
-				$_SESSION['user'] = $User->username;
+							// Save array back to JSON and set the session username.
+							$User->users[] = array( 'username' => $User->username, 'password' => null, 'project' => "" );
+							saveJSON( "users.php", $User->users );
+							$_SESSION['user'] = $User->username;
 
-			    } else {
+							} else {
 
-				// Deny login and send message, the user doesn't exist within users.php.
-				die( formatJSEND( "error", "User " . $User->username . " does not exist within Codiad." ) );
+								// Deny login and send message, the user doesn't exist within users.php.
+								die( formatJSEND( "error", "User " . $User->username . " does not exist within Codiad." ) );
 
-			    }
+							}
+
+						} else {
+
+							// Set the session username.
+							$_SESSION['user'] = $User->username;
+
+						}
+
+						// Set the session language, if given, or set it to english as default.
+						if ( isset( $_POST['language'] ) ) {
+
+							$_SESSION['lang'] = $_POST['language'];
+
+						} else {
+
+							$_SESSION['lang'] = "en";
+
+						}
+
+						// Set the session theme and project.
+						$_SESSION['theme'] = $_POST['theme'];
+						$_SESSION['project'] = $_POST['project'];
+
+						// Respond by sending verification tokens on success.
+						echo formatJSEND( "success", array( 'username' => $User->username ) );
+						header( "Location: " . $_SERVER['PHP_SELF'] . "?action=verify" );
+
+					}
+
+				} elseif ( $count > 1 ) {
+
+					// We returned too many results. Error as such.
+					die( formatJSEND( "error", "A server error occurred: LDAP filter result is non-unique. Please ensure this is a unique identifier within its context.
+												If the problem persists, please contact the webmaster. If you are the webmaster, please check the LDAP filter used." ) );
+
+				} else {
+
+					// Invalid login.
+					die( formatJSEND( "error", "Incorrect user name or password." ) );
+
+				}
 
 			} else {
 
-			    // Set the session username.
-			    $_SESSION['user'] = $User->username;
+				// The server is having issues connecting to the LDAP server. Error as such.
+				die( formatJSEND( "error", "An error occurred: Cannot connect to LDAP server. Please contact the webmaster. 
+											If you are the webmaster, please contact your LDAP server administrator or check if your LDAP server is running." ) );
 
 			}
-
-			// Set the session language, if given, or set it to english as default.
-			if ( isset( $_POST['language'] ) ) {
-
-			    $_SESSION['lang'] = $_POST['language'];
-
-			} else {
-
-			    $_SESSION['lang'] = "en";
-
-			}
-
-			// Set the session theme and project.
-			$_SESSION['theme'] = $_POST['theme'];
-			$_SESSION['project'] = $_POST['project'];
-
-			// Respond by sending verification tokens on success.
-			echo formatJSEND( "success", array( 'username' => $User->username ) );
-			header( "Location: " . $_SERVER['PHP_SELF'] . "?action=verify" );
-
-		    }
-
-		} elseif ( $count > 1 ) {
-
-		    // We returned too many results. Error as such.
-		    die( formatJSEND( "error", "A server error occurred: LDAP filter result is non-unique. Please ensure this is a unique identifier within its context.
-					    If the problem persists, please contact the webmaster. If you are the webmaster, please check the LDAP filter used." ) );
-
-		} else {
-
-		    // Invalid login.
-		    die( formatJSEND( "error", "Incorrect user name or password." ) );
-
 		}
-
-	    } else {
-
-		// The server is having issues connecting to the LDAP server. Error as such.
-                die( formatJSEND( "error", "An error occurred: Cannot connect to LDAP server. Please contact the webmaster. 
-                                        If you are the webmaster, please contact your LDAP server administrator or check if your LDAP server is running." ) );
-
-	    }
-	}
     }
 
 ?>
