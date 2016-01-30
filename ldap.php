@@ -65,13 +65,13 @@
 // to 'false' if the administrator would like to manually control access to 
 // Codiad from within Codiad itself, rather than let the search filter fully
 // dictate user access control. 
-// Default is 'true'.
+// 	Default is 'true'.
 	$createuser = true;
 
 // The LDAP protocol version to use. Changing this is probably a very bad 
 // idea unless you're absolutely positive you are using some completely 
 // non-standard or obsolete (pre-2003) version of LDAP.
-// Default is '3'. Developer heavily discourages changing this.
+// 	Default is '3'. Developer heavily discourages changing this.
 	$version = 3;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -212,5 +212,5 @@
 			}
 		}
 	}
-
 ?>
+

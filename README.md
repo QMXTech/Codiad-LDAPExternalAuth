@@ -15,7 +15,7 @@ Written by Korynkai (Matt Schultz) of QuantuMatriX Technologies.
 
 ## Configuration
 
-Most of the configuration should be completed during the installation; However it would be wise to explain these values:
+The following values should be set in accordance with the specific LDAP set-up being used:
 
 * `$server` would be your LDAP server's connection URI; For example:
  * `$server = 'ldap://ldap.example.com:389';`
@@ -23,9 +23,7 @@ Most of the configuration should be completed during the installation; However i
 * `$basedn` would be your LDAP server's search base distinguished name. This would be where Codiad looks for user entries within LDAP. Example:
  * `$basedn = 'ou=people,dc=example,dc=com';`
 
-* Set `$anonbind` based on whether or not your LDAP server uses anonymous binds for search. Active Directory does not allow this by default, however this is the default method for most servers based on the LDAP standard. Optionally one can bind to a user for search on any LDAP server or enable anonymous binds for search on Active Directory, however this allows for any search option. Examples:
- * `$anonbind = true;`
- * `$anonbind = false;`
+* Set `$anonbind` based on whether or not your LDAP server uses anonymous binds for search. Active Directory does not allow this by default, however this is the default method for most servers based on the LDAP standard. Optionally one can bind to a user for search on any LDAP server or enable anonymous binds for search on Active Directory, however this allows for any search option. Default is `true` to use anonymous bind (most LDAP servers except Active Directory).
 
 * `$binddn` and `$bindpass` are the corresponding DN and password to bind to for search if `$anonbind` is disabled. Examples:
  * `$binddn = "cn=binduser,cn=Users,dc=example,dc=com";`
